@@ -245,10 +245,11 @@ except requests.exceptions.RequestException as e:  # Generic catch
    - Risk: Uncaught exceptions crash session handler
    - Impact: Silent failures, hung requests
 
-6. **Redis Session TTL Undefined** (Medium)
+6. **Redis Session TTL Undefined** (Medium) ✅ RESOLVED
    - File: PORTALS.md, Line 132
    - Risk: Session memory accumulation
    - Impact: Gradual memory exhaustion
+   - Fix: Added Redis session TTL configuration (see REDIS_SESSION_GUIDE.md)
 
 ---
 

@@ -220,6 +220,13 @@ curl https://helix-unified-production.up.railway.app/health
 
 # Verify Redis cache
 !cache health
+
+# Check Redis session stats
+!redis info stats
+
+# Clear stale sessions if needed (caution: logs users out)
+!redis keys session:* | wc -l  # Count sessions
+# !redis flushdb  # Only if excessive session accumulation confirmed
 ```
 
 **Common Causes:**
@@ -228,6 +235,7 @@ curl https://helix-unified-production.up.railway.app/health
 3. Deadlock in agent initialization
 4. Network partition between services
 5. Railway platform incident
+6. Redis session accumulation (no TTL configured)
 
 **Step 4: Manual Restart (If Auto-Recovery Fails)**
 ```bash
