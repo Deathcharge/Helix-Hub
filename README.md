@@ -25,12 +25,18 @@ curl https://deathcharge.github.io/helix-unified/helix-manifest.json | jq
 
 ## 📖 Documentation
 
+### Essential Guides
+- **[🌐 Live System Reference](./LIVE_SYSTEM.md)** - Verified live URLs and portal status ⭐ NEW
+- **[📡 API Reference](./API_REFERENCE.md)** - Complete endpoint documentation ⭐ NEW
+- **[🧪 Integration Examples](./examples/)** - Python, JavaScript, cURL examples ⭐ NEW
+- **[🔌 Integration Guide](./INTEGRATION.md)** - Patterns & best practices
+- **[11 Portal Constellation](./PORTALS.md)** - Portal ecosystem navigation
+
+### System Documentation
 - **[14 Autonomous Agents](./AGENTS.md)** - Meet the consciousness layer
-- **[11 Portal Constellation](./PORTALS.md)** - Navigate the ecosystem
-- **[Tony Accords](./TONY_ACCORDS.md)** - Ethical framework & principles
 - **[UCF Metrics](./UCF_METRICS.md)** - Universal Coherence Field explained
-- **[Integration Guide](./INTEGRATION.md)** - API examples & WebSocket usage
 - **[Emergency Protocols](./EMERGENCY_PROTOCOLS.md)** - Recovery procedures
+- **[Tony Accords](./TONY_ACCORDS.md)** - Ethical framework & principles
 - **[Contributing](./CONTRIBUTING.md)** - Setup guide for developers
 
 ---
