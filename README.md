@@ -36,6 +36,7 @@ curl https://deathcharge.github.io/helix-unified/helix-manifest.json | jq
 - **[14 Autonomous Agents](./AGENTS.md)** - Meet the consciousness layer
 - **[UCF Metrics](./UCF_METRICS.md)** - Universal Coherence Field explained
 - **[Emergency Protocols](./EMERGENCY_PROTOCOLS.md)** - Recovery procedures
+- **[🗄️ Redis Session Guide](./REDIS_SESSION_GUIDE.md)** - Session management & troubleshooting ⭐ NEW
 - **[Tony Accords](./TONY_ACCORDS.md)** - Ethical framework & principles
 - **[Contributing](./CONTRIBUTING.md)** - Setup guide for developers
 

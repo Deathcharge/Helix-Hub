@@ -129,9 +129,21 @@ https://helix-unified-production.up.railway.app/docs
 #### Technology Stack
 - **Framework:** FastAPI (Python)
 - **Database:** PostgreSQL (managed by Railway)
-- **Caching:** Redis (session management)
+- **Caching:** Redis (session management with TTL)
 - **Deployment:** Railway (auto-deploy from GitHub)
 - **Monitoring:** Railway metrics + custom telemetry
+
+**Redis Session Configuration:**
+```bash
+# Recommended session TTL: 24 hours (86400 seconds)
+redis.session_ttl=86400
+
+# Session idle timeout: 5 minutes (300 seconds)
+redis.session_idle_timeout=300
+
+# Enable automatic session cleanup
+redis.session_cleanup=true
+```
 
 #### Access Methods
 ```python
