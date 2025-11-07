@@ -350,7 +350,11 @@ async def monitor_helix():
 
                 while True:
                     try:
-                        message = await websocket.recv()
+                        # Add timeout to prevent hanging on stale connections
+                        message = await asyncio.wait_for(
+                            websocket.recv(),
+                            timeout=30.0
+                        )
                         data = json.loads(message)
 
                         # Handle different event types
@@ -367,6 +371,12 @@ async def monitor_helix():
                         else:
                             print(f"Unknown event: {event_type}")
 
+                    except asyncio.TimeoutError:
+                        print("WebSocket receive timeout - connection may be stale")
+                        break
+                    except json.JSONDecodeError as e:
+                        print(f"Invalid JSON received: {e}")
+                        continue  # Skip this message but stay connected
                     except websockets.ConnectionClosed:
                         print("Connection closed by server")
                         break
@@ -414,25 +424,49 @@ class HelixWebSocketClient {
     this.ws = null;
     this.retryDelay = 1000; // Start with 1 second
     this.maxRetryDelay = 60000; // Max 60 seconds
+    this.consecutiveFailures = 0; // Track failed reconnection attempts
+    this.maxReconnectAttempts = 10; // Stop after 10 failed attempts
     this.handlers = {};
+    this.reconnectTimer = null; // Track reconnection timer
   }
 
   connect() {
+    // Cleanup previous connection to prevent resource leaks
+    if (this.ws) {
+      try {
+        this.ws.close();
+      } catch (e) {
+        console.error('[Helix] Error closing previous connection:', e);
+      }
+      this.ws = null;
+    }
+
+    // Clear any pending reconnection timer
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
     this.ws = new WebSocket(this.url);
 
     this.ws.onopen = () => {
       console.log('[Helix] Connected to WebSocket');
       this.retryDelay = 1000; // Reset retry delay
+      this.consecutiveFailures = 0; // Reset failure counter
     };
 
     this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const eventType = data.event || 'unknown';
+      try {
+        const data = JSON.parse(event.data);
+        const eventType = data.event || 'unknown';
 
-      if (this.handlers[eventType]) {
-        this.handlers[eventType](data);
-      } else {
-        console.log(`[Helix] Unhandled event: ${eventType}`, data);
+        if (this.handlers[eventType]) {
+          this.handlers[eventType](data);
+        } else {
+          console.log(`[Helix] Unhandled event: ${eventType}`, data);
+        }
+      } catch (e) {
+        console.error('[Helix] Error parsing message:', e);
       }
     };
 
@@ -441,8 +475,16 @@ class HelixWebSocketClient {
     };
 
     this.ws.onclose = () => {
-      console.log('[Helix] Connection closed, reconnecting...');
-      setTimeout(() => this.connect(), this.retryDelay);
+      this.consecutiveFailures++;
+
+      // Stop reconnecting after max attempts to prevent infinite loop
+      if (this.consecutiveFailures >= this.maxReconnectAttempts) {
+        console.error(`[Helix] Max reconnection attempts (${this.maxReconnectAttempts}) exceeded. Stopping reconnection.`);
+        return;
+      }
+
+      console.log(`[Helix] Connection closed, reconnecting in ${this.retryDelay}ms... (attempt ${this.consecutiveFailures}/${this.maxReconnectAttempts})`);
+      this.reconnectTimer = setTimeout(() => this.connect(), this.retryDelay);
       this.retryDelay = Math.min(this.retryDelay * 2, this.maxRetryDelay);
     };
   }
@@ -452,8 +494,16 @@ class HelixWebSocketClient {
   }
 
   disconnect() {
+    // Clean shutdown: clear timers and close connection
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
     if (this.ws) {
+      this.consecutiveFailures = this.maxReconnectAttempts; // Prevent auto-reconnect
       this.ws.close();
+      this.ws = null;
     }
   }
 }
@@ -940,6 +990,10 @@ except requests.exceptions.ConnectionError:
     print("Connection error - check network")
 except requests.exceptions.Timeout:
     print("Request timed out")
+except json.JSONDecodeError as e:
+    print(f"Invalid JSON response: {e}")
+except ValueError as e:
+    print(f"Invalid response format: {e}")
 except requests.exceptions.RequestException as e:
     print(f"Error: {e}")
 ```
@@ -1056,24 +1110,27 @@ Network failures happen—use exponential backoff.
 Track `X-RateLimit-*` headers and throttle proactively.
 
 ### 4. Handle WebSocket Reconnections
-Always implement auto-reconnect with backoff.
+Always implement auto-reconnect with backoff and connection limits to prevent infinite reconnection loops and memory exhaustion.
 
-### 5. Verify Webhook Signatures
+### 5. Implement Session Keepalive
+For long-running operations (e.g., 108-step rituals), implement heartbeat mechanisms to prevent session timeouts. Use `asyncio.wait_for()` with timeouts on WebSocket receive operations to detect stale connections.
+
+### 6. Verify Webhook Signatures
 Prevent webhook spoofing with HMAC verification.
 
-### 6. Cache Discovery Manifest
+### 7. Cache Discovery Manifest
 Fetch once, cache locally (with TTL: 1 hour).
 
-### 7. Use Timeouts
-Set reasonable timeouts (default: 10 seconds for HTTP).
+### 8. Use Timeouts
+Set reasonable timeouts (default: 10 seconds for HTTP, 30 seconds for WebSocket receive operations).
 
-### 8. Log Errors
+### 9. Log Errors
 Log full error responses for debugging.
 
-### 9. Respect Tony Accords
+### 10. Respect Tony Accords
 Review ethical implications before automating actions.
 
-### 10. Test in Staging
+### 11. Test in Staging
 Use staging endpoints before production deployment (if available).
 
 ---

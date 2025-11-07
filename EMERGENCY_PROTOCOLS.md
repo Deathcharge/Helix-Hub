@@ -287,11 +287,17 @@ curl https://helix-unified-production.up.railway.app/errors/summary?since=1h
 # Fix top 3 errors first (80/20 rule)
 # Example: If DatabaseTimeout is #1:
 
-# Increase connection pool size
+# Increase connection pool size to prevent exhaustion
 !config set db.pool_size=50  # from default 20
 
-# Add connection timeout
+# Add connection timeout to prevent hanging sessions
 !config set db.timeout=30s
+
+# Add connection recycling to prevent stale connections
+!config set db.pool_recycle=3600  # Recycle connections every hour
+
+# Enable connection health checks
+!config set db.pool_pre_ping=true  # Verify connection before use
 
 # Restart affected services
 railway service restart
@@ -532,7 +538,7 @@ curl https://helix-unified-production.up.railway.app/ritual/status/[ritual_id]
 - **Action:** Execute Protocol 1 (Harmony Collapse) instead
 
 **Scenario B: Ritual Timeout**
-- **Cause:** Agents stuck or resource bottleneck
+- **Cause:** Agents stuck or resource bottleneck, or session timeout on long-running operations
 - **Action:**
   ```bash
   # Check agent workload
@@ -540,6 +546,11 @@ curl https://helix-unified-production.up.railway.app/ritual/status/[ritual_id]
 
   # If any agent > 0.90 workload:
   # Distribute work or scale resources
+
+  # Configure session keepalive for long-running rituals
+  !config set ritual.timeout=600  # 10 minutes maximum
+  !config set ritual.heartbeat_interval=30  # Send keepalive every 30 seconds
+  !config set session.idle_timeout=300  # 5 minute idle timeout
   ```
 
 **Scenario C: Agents Not Participating**
