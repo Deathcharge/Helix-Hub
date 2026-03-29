@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ucf-protocol"
+version = "1.0.0"
+description = "Unified Consciousness Framework for agent synchronization"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Helix Collective", email = "dev@helix.collective"},
+]
+
+[project.urls]
+Homepage = "https://github.com/Deathcharge/ucf-protocol"
+Repository = "https://github.com/Deathcharge/ucf-protocol.git"
