@@ -12,8 +12,9 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import logging
-
 logger = logging.getLogger(__name__)
+
+# logger configured above
 
 
 class UCFTracker:
