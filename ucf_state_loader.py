@@ -80,7 +80,7 @@ def get_default_state() -> dict:
     # Try loading the most recent CoordinationSnapshot from the database
     # Database support is optional - gracefully degrade if not available
     try:
-        from apps.backend.db_models import CoordinationSnapshot, SessionLocal
+        # from helix_core.db_models import CoordinationSnapshot, SessionLocal
         from sqlalchemy import desc
 
         db = SessionLocal()

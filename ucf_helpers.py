@@ -119,7 +119,7 @@ def update_ucf_state(ucf_state: dict, save_to_file: bool = True) -> bool:
 
         # Also update cache if Redis is available (optional)
         try:
-            from apps.backend.core.transformation_engine import RedisCache
+            from helix_core.utils import RedisCache
             RedisCache.set_ucf_state(ucf_state)
         except (ImportError, ModuleNotFoundError):
             logger.debug("Redis cache not available - skipping cache update")
